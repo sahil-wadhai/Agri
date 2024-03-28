@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family:sans-serif;
+}
+
+.link{ 
+  color:blue;
+}
+.active{
+  color:green
+}
+.dash{
+  color: aqua;
+}
