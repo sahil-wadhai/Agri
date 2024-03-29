@@ -3,9 +3,9 @@ from typing import Union
 from fastapi import FastAPI,HTTPException,status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.encoders import jsonable_encoder
-from . import config
 from .fertilizer import fertilizer_dic
-import requests
+from .crop import crop_dict
+from .weather import weather_fetch
 from .schemas import Crop,Fertilizer
 import pickle
 import numpy as np
@@ -30,31 +30,13 @@ app.add_middleware(
 )
 
 # Importing Models
-# crop_recommendation_model_path = 'models/crop.pkl'
-# crop_recommendation_model = pickle.load(
-#     open(crop_recommendation_model_path, 'rb'))
+crop_model_path = 'notebooks/models/crop.pkl'
+crop_model = pickle.load(open(crop_model_path, 'rb'))
+sc = pickle.load(open('notebooks/models/standscaler.pkl','rb'))
+ms = pickle.load(open('notebooks/models/minmaxscaler.pkl','rb'))
 
-def weather_fetch(city_name):
-    """
-    Fetch and returns the temperature and humidity of a city
-    :params: city_name
-    :return: temperature, humidity
-    """
-    api_key = config.weather_api_key
-    base_url = "http://api.openweathermap.org/data/2.5/weather?"
 
-    complete_url = base_url + "appid=" + api_key + "&q=" + city_name
-    response = requests.get(complete_url)
-    x = response.json()
 
-    if x["cod"] != "404":
-        y = x["main"]
-
-        temperature = round((y["temp"] - 273.15), 2)
-        humidity = y["humidity"]
-        return [temperature, humidity]
-    else:
-        return []
 
 
 @app.get("/")
@@ -62,7 +44,7 @@ def read_root():
     return {"api": "Agrisense-api"}
 
 @app.post("/crop-recommend")
-async def crop_recommend(body:Crop):
+def crop_recommend(body:Crop):
     try:
         data = jsonable_encoder(body)
         N = int(data['nitrogen'])
@@ -75,12 +57,20 @@ async def crop_recommend(body:Crop):
         city = data['city']
         if weather_fetch(city) != None:
             temperature, humidity = weather_fetch(city)
-            data = np.array([[N, P, K, temperature, humidity, ph, rainfall]])
-            print(temperature,humidity)
-            # my_prediction = crop_recommendation_model.predict(data)
-            # final_prediction = my_prediction[0]
-            final_prediction = "Apple"
-        return {"crop":final_prediction}
+            feature_list = np.array([[N, P, K, temperature, humidity, ph, rainfall]])
+            single_pred = np.array(feature_list).reshape(1, -1)
+            scaled_features = ms.transform(single_pred)
+            final_features = sc.transform(scaled_features)
+
+            my_prediction = crop_model.predict(final_features)
+            final_prediction = my_prediction[0]
+            
+            
+            if final_prediction in crop_dict:
+                crop = crop_dict[final_prediction]
+            else:
+                crop = "Not found"
+        return {"crop":crop}
     except:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,detail="Internal server error")
 
@@ -96,7 +86,7 @@ def fertilizer_recommend(body:Fertilizer):
         crop = str(data['crop'])
 
         crop= crop.lower()
-        df = pd.read_csv('notebooks/fertilizer_0.csv')
+        df = pd.read_csv('notebooks/datasets/fertilizer_0.csv')
         nr = df[df['Crop'] == crop]['N'].iloc[0]
         pr = df[df['Crop'] == crop]['P'].iloc[0]
         kr = df[df['Crop'] == crop]['K'].iloc[0]

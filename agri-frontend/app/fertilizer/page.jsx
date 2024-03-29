@@ -40,7 +40,7 @@ export default function page() {
     };
 
     try {
-      const res = await fetch("http://127.0.0.1:8000/fertilizer-recommend", config);
+      const res = await fetch("http://127.0.0.1:8000/fertilizer-recommend", config,{ cache: 'no-store' });
       const data = await res.json();
       setFertilizer(data.fertilizer)
       setAdvice(data.advice)

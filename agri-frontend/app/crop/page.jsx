@@ -34,7 +34,7 @@ export default function page() {
     };
 
     try {
-      const res = await fetch("http://127.0.0.1:8000/crop-recommend", config);
+      const res = await fetch("http://127.0.0.1:8000/crop-recommend", config, { cache: 'no-store' });
       const data = await res.json();
       setCrop(data.crop)
       console.log(res);
