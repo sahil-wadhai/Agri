@@ -1,4 +1,8 @@
-fertilizer_dic = {
+fertilizer_dict={0: '10-26-26', 1: '14-35-14', 2: '17-17-17', 3: '20-20', 4: '28-28', 5: 'DAP', 6: 'Urea'}
+croptype_dict={0: 'Barley', 1: 'Cotton', 2: 'Ground Nuts', 3: 'Maize', 4: 'Millets', 5: 'Oil seeds', 6: 'Paddy', 7: 'Pulses', 8: 'Sugarcane', 9: 'Tobacco', 10: 'Wheat'}
+soil_dict={0: 'Black', 1: 'Clayey', 2: 'Loamy', 3: 'Red', 4: 'Sandy'}
+
+advice_dict = {
         'NHigh': """The N value of soil is high and might give rise to weeds.
         <br/> Please consider the following suggestions:
 
@@ -90,3 +94,5 @@ fertilizer_dic = {
         <br/>5. Use Potash fertilizers since they contain high values potassium
         """
     }
+
+

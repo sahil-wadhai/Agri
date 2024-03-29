@@ -3,7 +3,7 @@ from typing import Union
 from fastapi import FastAPI,HTTPException,status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.encoders import jsonable_encoder
-from .fertilizer import fertilizer_dic
+from .fertilizer import advice_dict,fertilizer_dict,croptype_dict,soil_dict
 from .crop import crop_dict
 from .weather import weather_fetch
 from .schemas import Crop,Fertilizer
@@ -34,9 +34,7 @@ crop_model_path = 'notebooks/models/crop.pkl'
 crop_model = pickle.load(open(crop_model_path, 'rb'))
 sc = pickle.load(open('notebooks/models/standscaler.pkl','rb'))
 ms = pickle.load(open('notebooks/models/minmaxscaler.pkl','rb'))
-
-
-
+fertilizer_model = pickle.load(open('notebooks/models/fertilizer.pkl', 'rb'))
 
 
 @app.get("/")
@@ -85,46 +83,30 @@ def fertilizer_recommend(body:Fertilizer):
         soil = str(data['soil'])
         crop = str(data['crop'])
 
-        crop= crop.lower()
-        df = pd.read_csv('notebooks/datasets/fertilizer_0.csv')
-        nr = df[df['Crop'] == crop]['N'].iloc[0]
-        pr = df[df['Crop'] == crop]['P'].iloc[0]
-        kr = df[df['Crop'] == crop]['K'].iloc[0]
-        
-        n = nr - N
-        p = pr - P
-        k = kr - K
-        temp = {abs(n): "N", abs(p): "P", abs(k): "K"}
-        max_value = temp[max(temp.keys())]
-        if max_value == "N":
-            if n < 0:
-                key = 'NHigh'
-            else:
-                key = "Nlow"
-        elif max_value == "P":
-            if p < 0:
-                key = 'PHigh'
-            else:
-                key = "Plow"
-        else:
-            if k < 0:
-                key = 'KHigh'
-            else:
-                key = "Klow"
+        soil_index = 0
+        for x in soil_dict:
+            if soil == soil_dict[x]:
+                soil_index = x
+
+        croptype_index = 0
+        for x in croptype_dict:
+            if crop == croptype_dict[x]:
+                croptype_index = x
 
         city = data['city']
         if weather_fetch(city) != None:
-            temperature, humidity = weather_fetch(city)
-            data = np.array([[N, P, K, temperature, humidity, moisture, soil, crop]])
-            print(temperature,humidity)
-            # my_prediction = fertilizer_recommendation_model.predict(data)
-            # final_prediction = my_prediction[0]
-            final_prediction = "Urea"
-            advice = fertilizer_dic[key]
-            print(advice)
-            return {"fertilizer":final_prediction,"advice":advice}
+            temparature, humidity = weather_fetch(city)
+            feature_list = np.array([[temparature,	humidity,	moisture,	soil_index,	croptype_index,	N,	K,	P]]).reshape(1, -1)
+            my_prediction = fertilizer_model.predict(feature_list)
+            final_prediction = my_prediction[0]
+            advice = advice_dict["NHigh"]
+            if final_prediction in fertilizer_dict:
+                fertilizer = fertilizer_dict[final_prediction]
+            else:
+                fertilizer = "Not found"
+            return {"fertilizer":fertilizer,"advice":advice}
         else:
-            return {"fertilizer":"","advice":""}
+            return {"fertilizer":"","advice":"<li><li>"}
     except:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,detail="Internal server error")
     
