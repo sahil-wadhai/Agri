@@ -2,7 +2,7 @@ import Link from "next/link"
 export default function Services() {
   return (
     <>
-        <h1 className='text-center text-5xl font-sans text-[#323648] p-20 font-normal'>About Us</h1>
+        <h1 className='text-center text-5xl font-sans text-[#323648] p-20 font-normal'>Our Services</h1>
         <div className="grid grid-cols-2 gap-8 px-10 mx-20 mb-20">
             <div className="max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
                 <Link href="/crop">
