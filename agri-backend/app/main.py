@@ -1,15 +1,17 @@
 from typing import Union
 
-from fastapi import FastAPI,HTTPException,status
+from fastapi import FastAPI,HTTPException,status,Body
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.encoders import jsonable_encoder
 from .fertilizer import advice_dict,fertilizer_dict,croptype_dict,soil_dict
 from .crop import crop_dict
 from .weather import weather_fetch
-from .schemas import Crop,Fertilizer
+from .schemas import Crop,Fertilizer,SensorData,SensorDataResponse,collection
 import pickle
 import numpy as np
 import pandas as pd
+from datetime import date,datetime
+from bson.objectid import ObjectId
 
 app = FastAPI()
 
@@ -110,3 +112,61 @@ def fertilizer_recommend(body:Fertilizer):
     except:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,detail="Internal server error")
     
+@app.post("/sensor-save",response_description="Save sensor data",response_model=SensorDataResponse)
+async def save_sensor_data(sensor_data:SensorData=Body(...)):
+    try:
+        # sensor_data_dict = sensor_data.dict(exclude={"id"})
+        sensor_data_dict = jsonable_encoder(sensor_data)
+        sensor_data_dict["date"] = str(date.today())
+        sensor_data_dict["time"] = str(datetime.now().strftime("%H:%M:%S"))
+        new_data = await collection.insert_one(sensor_data_dict)
+        created_instance = await collection.find_one({"_id":new_data.inserted_id})
+        return created_instance
+    except:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,detail="Internal server error")
+
+@app.get("/sensor-get")
+async def get_sensor_data():
+    try:
+        result = collection.find().sort([("date", -1), ("time", -1)]).limit(5)
+    
+        # Calculate average of the attributes
+        total_N = 0
+        total_P = 0
+        total_K = 0
+        total_temperature = 0
+        total_humidity = 0
+        total_moisture = 0
+        total_docs = 0
+        async for item in result:
+            total_temperature += item.get('temperature', 0)
+            total_humidity += item.get('humidity', 0)
+            total_moisture += item.get('moisture', 0)
+            total_N += item.get('N', 0)
+            total_P += item.get('P', 0)
+            total_K += item.get('K', 0)
+            total_docs += 1
+        
+        # Calculate averages
+        average_temperature = total_temperature / total_docs if total_docs > 0 else 0
+        average_humidity = total_humidity / total_docs if total_docs > 0 else 0
+        average_moisture = total_moisture / total_docs if total_docs > 0 else 0
+        average_N = total_N / total_docs if total_docs > 0 else 0
+        average_P = total_P / total_docs if total_docs > 0 else 0
+        average_K = total_K / total_docs if total_docs > 0 else 0
+        
+        # Create a new document with the average values
+        new_document = {
+            "N":average_N,
+            "P" : average_P,
+            "K" : average_K,
+            "temperature": average_temperature,
+            "humidity": average_humidity,
+            "moisture": average_moisture
+        }
+        
+        return new_document
+
+
+    except:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,detail="Internal server error")
