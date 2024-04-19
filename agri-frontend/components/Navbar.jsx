@@ -33,7 +33,9 @@ export default function Navbar(){
             <li>
             <Link href="/fertilizer" className="block py-2 px-3 rounded hover:bg-transparent md:border-0 md:hover:text-green-500 md:p-0 text-white">Fertilizer</Link>
             </li>
-            
+            <li>
+            <Link href="/dashboard" className="block py-2 px-3 rounded hover:bg-transparent md:border-0 md:hover:text-green-500 md:p-0 text-white">Dashboard</Link>
+            </li>
         </ul>
         </div>
     </div>

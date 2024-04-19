@@ -12,6 +12,7 @@ export default function Page() {
       <About/>
       <div className='my-20'></div>
       <Services/>
+      
     </>
   )
 }

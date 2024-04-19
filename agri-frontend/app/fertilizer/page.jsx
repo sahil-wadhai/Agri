@@ -16,6 +16,8 @@ export default function page() {
   const [soil, setSoil] = useState("");
   const [crop, setCrop] = useState("");
 
+  const [sensorData, setSensorData] = useState([]);
+
 
   const[fertilizer,setFertilizer] = useState("")
   const[advice,setAdvice] = useState("<div></div>")
@@ -54,9 +56,30 @@ export default function page() {
     e.preventDefault();
     submitLogin();
   }
+  const fetchData = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/sensor-get');
+      const data = await response.json();
+      setSensorData(data);
+      setNitrogen(sensorData["N"])
+      setPhosphorous(sensorData["P"])
+      setPottasium(sensorData["K"])
+      setMoisture(sensorData["moisture"])
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
   return (
     <div className='object-center px-4 pt-10 text-3xl font-sans bg-[#CECEE4] min-h-screen'>
       <h1 className='text-center mb-12'>Get informed advice on fertilizer based on soil</h1>
+      <div className="flex justify-center">
+        <button
+        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded mb-2 text-lg"
+        onClick={fetchData}
+        >
+          Fetch Data
+        </button>
+      </div>
       <form className="max-w-sm mx-auto pb-12" onSubmit={handleSubmit}>
         <div className="mb-5">
           <label htmlFor="nitrogen" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nitrogen</label>
