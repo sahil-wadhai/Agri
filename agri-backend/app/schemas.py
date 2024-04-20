@@ -37,7 +37,7 @@ class SensorData(BaseModel):
     moisture:float = Field(...,ge=0,description="Soil moisture percentage")
     temperature:float = Field(...,ge=0,description="Temperature in Celsius")
     humidity:float = Field(...,ge=0,description="Relative humidity percentage")
-    
+    ph:float = Field(...,ge=0,description="Soil pH value")
     class Config:
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
@@ -49,7 +49,8 @@ class SensorData(BaseModel):
                 "K": 50,
                 "moisture": 60,
                 "temperature": 20.87,
-                "humidity": 82.31
+                "humidity": 82.31,
+                "ph" : 7
             }
         }
 
@@ -62,6 +63,7 @@ class SensorDataResponse(BaseModel):
     moisture:float = Field(...,ge=0,description="Soil moisture percentage")
     temperature:float = Field(...,ge=0,description="Temperature in Celsius")
     humidity:float = Field(...,ge=0,description="Relative humidity percentage")
+    ph:float = Field(...,ge=0,description="Soil pH value")
     date : str = Field(...)
     time : str = Field(...)
 
@@ -77,6 +79,7 @@ class SensorDataResponse(BaseModel):
                 "moisture": 60,
                 "temperature": 20.87,
                 "humidity": 82.31,
+                "ph" : 7,
                 "date":"2024-04-19",
                 "time":"07:41:19"
             }
@@ -87,7 +90,6 @@ class Crop(BaseModel):
     phosphorous: int = Field(...,ge=0)
     pottasium: int = Field(...,ge=0)
     ph: float = Field(...)
-    rainfall: float = Field(...)
     state: str = Field(...,min_length=2)
     city:str = Field(...,min_length=2)
 

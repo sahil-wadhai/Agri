@@ -51,12 +51,12 @@ def crop_recommend(body:Crop):
         P = int(data['phosphorous'])
         K = int(data['pottasium'])
         ph = float(data['ph'])
-        rainfall = float(data['rainfall'])
 
         # state = request.form.get("stt")
         city = data['city']
         if weather_fetch(city) != None:
-            temperature, humidity = weather_fetch(city)
+            temperature, humidity, rainfall = weather_fetch(city)
+            print(temperature,humidity,rainfall)
             feature_list = np.array([[N, P, K, temperature, humidity, ph, rainfall]])
             single_pred = np.array(feature_list).reshape(1, -1)
             scaled_features = ms.transform(single_pred)
@@ -113,7 +113,7 @@ def fertilizer_recommend(body:Fertilizer):
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,detail="Internal server error")
     
 @app.post("/sensor-save",response_description="Save sensor data",response_model=SensorDataResponse)
-async def save_sensor_data(sensor_data:SensorData=Body(...)):
+async def save_sensor_data(sensor_data:SensorData):
     try:
         # sensor_data_dict = sensor_data.dict(exclude={"id"})
         sensor_data_dict = jsonable_encoder(sensor_data)
@@ -138,6 +138,7 @@ async def get_sensor_data():
         total_humidity = 0
         total_moisture = 0
         total_docs = 0
+        total_ph = 0
         async for item in result:
             total_temperature += item.get('temperature', 0)
             total_humidity += item.get('humidity', 0)
@@ -145,6 +146,7 @@ async def get_sensor_data():
             total_N += item.get('N', 0)
             total_P += item.get('P', 0)
             total_K += item.get('K', 0)
+            total_ph += item.get('ph', 0)
             total_docs += 1
         
         # Calculate averages
@@ -154,7 +156,7 @@ async def get_sensor_data():
         average_N = total_N / total_docs if total_docs > 0 else 0
         average_P = total_P / total_docs if total_docs > 0 else 0
         average_K = total_K / total_docs if total_docs > 0 else 0
-        
+        average_ph = total_ph / total_docs if total_docs > 0 else 0
         # Create a new document with the average values
         new_document = {
             "N":average_N,
@@ -162,7 +164,8 @@ async def get_sensor_data():
             "K" : average_K,
             "temperature": average_temperature,
             "humidity": average_humidity,
-            "moisture": average_moisture
+            "moisture": average_moisture,
+            "ph":average_ph
         }
         
         return new_document

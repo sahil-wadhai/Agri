@@ -61,14 +61,47 @@ export default function page() {
       const response = await fetch('http://localhost:8000/sensor-get');
       const data = await response.json();
       setSensorData(data);
-      setNitrogen(sensorData["N"])
-      setPhosphorous(sensorData["P"])
-      setPottasium(sensorData["K"])
+      // setNitrogen(sensorData["N"])
+      // setPhosphorous(sensorData["P"])
+      // setPottasium(sensorData["K"])
       setMoisture(sensorData["moisture"])
     } catch (error) {
       console.error('Error fetching data:', error);
     }
   };
+  useEffect(() => {
+    switch(soil) {
+      case "Sandy":
+        setNitrogen(100)
+        setPhosphorous(30)
+        setPottasium(100)
+        break;
+      case "Loamy":
+        setNitrogen(100)
+        setPhosphorous(50)
+        setPottasium(100)
+        break;
+      case "Black":
+        setNitrogen(90)
+        setPhosphorous(70)
+        setPottasium(30)
+        break;
+      case "Red":
+        setNitrogen(100)
+        setPhosphorous(20)
+        setPottasium(100)
+        break;
+      case "Clayey":
+        setNitrogen(100)
+        setPhosphorous(40)
+        setPottasium(100)
+        break;
+      default:
+        break;
+        
+    }
+  },[soil]);
+    
   return (
     <div className='object-center px-4 pt-10 text-3xl font-sans bg-[#CECEE4] min-h-screen'>
       <h1 className='text-center mb-12'>Get informed advice on fertilizer based on soil</h1>
@@ -81,6 +114,15 @@ export default function page() {
         </button>
       </div>
       <form className="max-w-sm mx-auto pb-12" onSubmit={handleSubmit}>
+        <div className='mb-5'>
+          <label htmlFor="soil" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Select Soil Type</label>
+          <select id="soil" value={soil} onChange={ (e)=>{setSoil(e.target.value)} } className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+            <option>Select Soil</option>
+            {soil_types.map((soil)=>
+              (<option value={soil}>{soil}</option>)
+            )}
+          </select>
+        </div>
         <div className="mb-5">
           <label htmlFor="nitrogen" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nitrogen</label>
           <input type="number" id="nitrogen" value={nitrogen} onChange={ (e)=>{setNitrogen(e.target.value)} } className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Enter the value (example:50)" required />
@@ -96,15 +138,6 @@ export default function page() {
         <div className="mb-5">
           <label htmlFor="moisture" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Soil Moisture</label>
           <input type="number" id="moisture" value={moisture} onChange={ (e)=>{setMoisture(e.target.value)} } className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Enter the value (example:50)" required />
-        </div>
-        <div className='mb-5'>
-          <label htmlFor="soil" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Select Soil Type</label>
-          <select id="soil" value={soil} onChange={ (e)=>{setSoil(e.target.value)} } className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-            <option>Select Soil</option>
-            {soil_types.map((soil)=>
-              (<option value={soil}>{soil}</option>)
-            )}
-          </select>
         </div>
         <div className='mb-5'>
           <label htmlFor="crop" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Crop you want to grow</label>
