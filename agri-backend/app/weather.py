@@ -14,7 +14,8 @@ def weather_fetch(city_name:str):
     x = response.json()
     if x["cod"] != "404":
         y_1 = x["main"]
-        # y_2 = x["Rain"]
+        # y_2 = x["rain"]
+        # print(y_2)
         temperature = round((y_1["temp"] - 273.15), 2)
         humidity = y_1["humidity"]
         # rain = y_2["1h"]

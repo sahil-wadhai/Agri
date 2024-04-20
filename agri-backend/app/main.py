@@ -56,7 +56,6 @@ def crop_recommend(body:Crop):
         city = data['city']
         if weather_fetch(city) != None:
             temperature, humidity, rainfall = weather_fetch(city)
-            print(temperature,humidity,rainfall)
             feature_list = np.array([[N, P, K, temperature, humidity, ph, rainfall]])
             single_pred = np.array(feature_list).reshape(1, -1)
             scaled_features = ms.transform(single_pred)
@@ -85,19 +84,45 @@ def fertilizer_recommend(body:Fertilizer):
         soil = str(data['soil'])
         crop = str(data['crop'])
 
+        df = pd.read_csv('notebooks/datasets/fertilizer_0.csv')
+
+        nr = df[df['Crop'] == crop]['N'].iloc[0]
+        pr = df[df['Crop'] == crop]['P'].iloc[0]
+        kr = df[df['Crop'] == crop]['K'].iloc[0]
+
+        n = nr - N
+        p = pr - P
+        k = kr - K
+        temp = {abs(n): "N", abs(p): "P", abs(k): "K"}
+        max_value = temp[max(temp.keys())]
+        if max_value == "N":
+            if n < 0:
+                key = 'NHigh'
+            else:
+                key = "Nlow"
+        elif max_value == "P":
+            if p < 0:
+                key = 'PHigh'
+            else:
+                key = "Plow"
+        else:
+            if k < 0:
+                key = 'KHigh'
+            else:
+                key = "Klow"
+        advice = str(advice_dict[key])
+
         soil_index = 0
         for x in soil_dict:
             if soil == soil_dict[x]:
                 soil_index = x
-
         croptype_index = 0
         for x in croptype_dict:
             if crop == croptype_dict[x]:
                 croptype_index = x
-
         city = data['city']
         if weather_fetch(city) != None:
-            temparature, humidity = weather_fetch(city)
+            temparature, humidity,rainfall = weather_fetch(city)
             feature_list = np.array([[temparature,	humidity,	moisture,	soil_index,	croptype_index,	N,	K,	P]]).reshape(1, -1)
             my_prediction = fertilizer_model.predict(feature_list)
             final_prediction = my_prediction[0]
@@ -129,7 +154,7 @@ async def save_sensor_data(sensor_data:SensorData):
 async def get_sensor_data():
     try:
         result = collection.find().sort([("date", -1), ("time", -1)]).limit(5)
-    
+        
         # Calculate average of the attributes
         total_N = 0
         total_P = 0
