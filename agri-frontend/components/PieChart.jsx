@@ -1,4 +1,4 @@
-'use client'
+
 import React from 'react';
 import Chart from 'react-apexcharts';
 
@@ -11,6 +11,7 @@ const PieChart = ({ data }) => {
       type: 'pie',
     },
     labels: labels,
+    colors: ['#2196F3', '#4CAF50', '#00BCD4'],
     responsive: [{
       breakpoint: 480,
       options: {
@@ -29,7 +30,7 @@ const PieChart = ({ data }) => {
       options={options}
       series={series}
       type="pie"
-      width="40%"
+      width="70%"
     />
   );
 };

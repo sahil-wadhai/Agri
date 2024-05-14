@@ -1,4 +1,4 @@
-'use client'
+
 import React from 'react';
 import Chart from 'react-apexcharts';
 
@@ -22,8 +22,10 @@ const LineChart = ({ data }) => {
         title: {
           text: 'Values',
         },
+        
       },
     ],
+    // colors: ['#2196F3', '#4CAF50', '#00BCD4'],
   };
 
   return (
@@ -31,7 +33,7 @@ const LineChart = ({ data }) => {
       options={options}
       series={series}
       type="line"
-      width="50%"
+      width="90%"
       height="400"
     />
   );

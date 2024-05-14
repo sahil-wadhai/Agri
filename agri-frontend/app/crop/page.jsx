@@ -13,7 +13,7 @@ export default function page() {
   const [phosphorous, setPhosphorous] = useState("");
   const [pottasium, setPottasium] = useState("");
   const [ph, setPh] = useState("");
-  const [rainfall, setRainfall] = useState("");
+ 
   const [state, setState] = useState("Maharashtra");
   const [city, setCity] = useState("");
 
@@ -25,7 +25,6 @@ export default function page() {
       "phosphorous": phosphorous,
       "pottasium": pottasium,
       "ph": ph,
-      "rainfall": rainfall,
       "state":state,
       "city":city
     }
@@ -53,7 +52,7 @@ export default function page() {
   }
   const fetchData = async () => {
     try {
-      const response = await fetch('http://localhost:8000/sensor-get');
+      const response = await fetch('http://192.168.43.96:8000/sensor-get');
       const data = await response.json();
       setSensorData(data);
       setPh(sensorData["ph"])

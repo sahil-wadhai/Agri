@@ -31,9 +31,6 @@ class PyObjectId(ObjectId):
 
 class SensorData(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
-    N: int = Field(...,ge=0,description="Nitrogen content in the soil (in ppm)")
-    P: int = Field(...,ge=0,description="Phosphorous content in the soil (in ppm)")
-    K: int = Field(...,ge=0,description="Pottasium content in the soil (in ppm)")
     moisture:float = Field(...,ge=0,description="Soil moisture percentage")
     temperature:float = Field(...,ge=0,description="Temperature in Celsius")
     humidity:float = Field(...,ge=0,description="Relative humidity percentage")
@@ -44,9 +41,6 @@ class SensorData(BaseModel):
         json_encoders = {ObjectId: str}
         schema_extra = {
             "example": {
-                "N": 50,
-                "P": 50,
-                "K": 50,
                 "moisture": 60,
                 "temperature": 20.87,
                 "humidity": 82.31,
@@ -54,12 +48,28 @@ class SensorData(BaseModel):
             }
         }
 
+class NPK(BaseModel):
+    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+    N: Optional[int] = Field(default=50,ge=0,description="Nitrogen content in the soil (in ppm)")
+    P: Optional[int] = Field(default=50,ge=0,description="Phosphorous content in the soil (in ppm)")
+    K: Optional[int] = Field(default=50,ge=0,description="Pottasium content in the soil (in ppm)")
+    
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
+        schema_extra = {
+            "example": {
+                "N": 50,
+                "P": 50,
+                "K": 50
+            }
+        }
+
     
 class SensorDataResponse(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
-    N: int = Field(...,ge=0,description="Nitrogen content in the soil (in ppm)")
-    P: int = Field(...,ge=0,description="Phosphorous content in the soil (in ppm)")
-    K: int = Field(...,ge=0,description="Pottasium content in the soil (in ppm)")
+
     moisture:float = Field(...,ge=0,description="Soil moisture percentage")
     temperature:float = Field(...,ge=0,description="Temperature in Celsius")
     humidity:float = Field(...,ge=0,description="Relative humidity percentage")
@@ -73,9 +83,6 @@ class SensorDataResponse(BaseModel):
         json_encoders = {ObjectId: str}
         schema_extra = {
             "example": {
-                "N": 50,
-                "P": 50,
-                "K": 50,
                 "moisture": 60,
                 "temperature": 20.87,
                 "humidity": 82.31,
